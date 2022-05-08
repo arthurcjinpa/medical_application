@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "USERS")
 // TODO: 29.04.2022 Объединить в @Data и исключить @ToString
 @Getter
 @Setter
@@ -28,19 +28,19 @@ public class User {
     private Long id;
 
     @Column
-    private String sex;
+    private String firstName;
 
     @Column
-    private String email;
+    private String lastName;
 
     @Column
     private int age;
 
     @Column
-    private String firstName;
+    private String sex;
 
-    @Column
-    private String lastName;
+    @Column(unique = true)
+    private String email;
 
     //связь
     @JsonManagedReference

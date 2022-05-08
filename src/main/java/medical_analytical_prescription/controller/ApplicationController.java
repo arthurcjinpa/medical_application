@@ -28,4 +28,9 @@ public class ApplicationController {
         applicationService.deleteApplications();
     }
 
+    @GetMapping("user/applications/{id}")
+    public List<Application> findApplicationsByUserId(@PathVariable Long id) {
+       return applicationService.findApplicationsByUserId(id);
+    }
+
 }

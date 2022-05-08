@@ -5,14 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import medical_analytical_prescription.utils.StringToListConverter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 //в будущем добавить поле, если прошел сесюрити (регистрацию), то будет поле boolean isClient
 
 @Entity
-@Table(name = "application")
+@Table(name = "APPLICATION")
 // TODO: 29.04.2022 Объединить в @Data и исключить @ToString
 @Getter
 @Setter
@@ -31,8 +33,9 @@ public class Application {
     @Column
     private String status;
 
-//    @OneToMany
-//    private List<Symptom> symptoms;
+    @Column
+    @Convert(converter = StringToListConverter.class)
+    private List<String> symptoms;
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
