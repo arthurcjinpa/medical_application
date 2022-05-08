@@ -1,11 +1,10 @@
 CREATE TABLE IF NOT EXISTS public.users
 (
-    id bigint NOT NULL,
+    id bigserial NOT NULL PRIMARY KEY,
+    first_name character varying(255),
+    last_name character varying(255),
     age integer,
-    first_name character varying(255) COLLATE pg_catalog."default",
-    last_name character varying(255) COLLATE pg_catalog."default",
-    sex character varying(255) COLLATE pg_catalog."default",
-    CONSTRAINT users_pkey PRIMARY KEY (id)
+    sex character varying(255)
 );
 
 

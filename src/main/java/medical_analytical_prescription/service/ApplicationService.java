@@ -1,7 +1,6 @@
 package medical_analytical_prescription.service;
 
 import medical_analytical_prescription.entity.Application;
-import medical_analytical_prescription.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,5 +13,7 @@ public interface ApplicationService {
     void addApplication(Application application);
 
     void deleteApplications();
+
+    List<Application> findApplicationsByUserId(Long id);
 
 }
