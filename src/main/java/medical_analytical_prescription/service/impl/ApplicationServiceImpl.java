@@ -3,6 +3,7 @@ package medical_analytical_prescription.service.impl;
 import lombok.RequiredArgsConstructor;
 import medical_analytical_prescription.entity.Application;
 import medical_analytical_prescription.entity.User;
+import medical_analytical_prescription.exception.ApplicationNotFoundException;
 import medical_analytical_prescription.repository.ApplicationRepository;
 import medical_analytical_prescription.repository.UserRepository;
 import medical_analytical_prescription.service.ApplicationService;
@@ -46,16 +47,24 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         application.setCreateDate(LocalDateTime.now());
         applicationRepository.save(application);
-
     }
 
     @Override
-    public void deleteApplications() {
-        applicationRepository.deleteAll();
+    public void deleteApplicationById(Long id) {
+        applicationRepository.deleteById(id);
     }
 
     @Override
     public List<Application> findApplicationsByUserId(Long id) {
         return applicationRepository.findApplicationByApplicantId(id);
+    }
+
+    @Override
+    public Application getApplicationById(Long id) {
+        return applicationRepository.findById(id)
+                .orElseThrow(
+                        () -> {
+                            throw new ApplicationNotFoundException("Application with id " + id + " not found.");
+                        });
     }
 }

@@ -9,28 +9,33 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/application")
 public class ApplicationController {
 
     private final ApplicationService applicationService;
 
-    @GetMapping("applications/all")
+    @GetMapping("/list")
     public List<Application> allApplications() {
         return applicationService.showAllApplications();
     }
 
-    @PostMapping("application/add")
+    @GetMapping("/{id}")
+    public Application getApplicationById(@PathVariable Long id) {
+        return applicationService.getApplicationById(id);
+    }
+
+    @PostMapping("/add")
     public void addApplication(@RequestBody Application application) {
         applicationService.addApplication(application);
     }
 
-    @DeleteMapping("applications/delete")
-    public void deleteApplications() {
-        applicationService.deleteApplications();
+    @DeleteMapping("/delete/{id}")
+    public void deleteApplications(@PathVariable Long id) {
+        applicationService.deleteApplicationById(id);
     }
 
-    @GetMapping("user/applications/{id}")
+    @GetMapping("/user/{id}")
     public List<Application> findApplicationsByUserId(@PathVariable Long id) {
-       return applicationService.findApplicationsByUserId(id);
+        return applicationService.findApplicationsByUserId(id);
     }
-
 }

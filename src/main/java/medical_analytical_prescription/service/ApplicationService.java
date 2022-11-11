@@ -12,8 +12,9 @@ public interface ApplicationService {
 
     void addApplication(Application application);
 
-    void deleteApplications();
+    void deleteApplicationById(Long id);
 
     List<Application> findApplicationsByUserId(Long id);
 
+    Application getApplicationById(Long id);
 }
