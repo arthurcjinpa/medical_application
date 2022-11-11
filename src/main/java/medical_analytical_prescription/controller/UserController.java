@@ -9,23 +9,28 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("users/all")
-    public List<User> allUsers() {
-        return userService.showAllUsers();
+    @GetMapping("/list")
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
 
-    @PostMapping("user/add")
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+
+    @PostMapping("/add")
     public void addUser(@RequestBody User user) {
         userService.addUser(user);
     }
 
-    @DeleteMapping("users/delete")
-    public void deleteUsers() {
-        userService.deleteUsers();
+    @DeleteMapping("/delete/{userId}")
+    public void deleteUsers(@PathVariable Long userId) {
+        userService.deleteUserByUserId(userId);
     }
-
 }
