@@ -7,10 +7,11 @@ import medical_analytical_prescription.exception.ApplicationNotFoundException;
 import medical_analytical_prescription.repository.ApplicationRepository;
 import medical_analytical_prescription.repository.UserRepository;
 import medical_analytical_prescription.service.ApplicationService;
+import medical_analytical_prescription.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import java.util.List;
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final UserRepository userRepository;
+    private final UserService userService;
     private final ApplicationRepository applicationRepository;
 
     @Override
@@ -27,26 +29,37 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public void addApplication(Application application) {
+    public Application addApplication(Application application) {
         List<Application> applications = new ArrayList<>();
         applications.add(application);
+
         User user = userRepository.getUserByEmail(application.getApplicant().getEmail());
 
-        if (userRepository.existsUserByEmail(application.getApplicant().getEmail())
-                && user != null && !CollectionUtils.isEmpty(user.getApplicationHistoryIds())) {
+        if (isUserHaveApplicationHistory(user, application)) {
             user.getApplicationHistoryIds().add(application);
-        } else if(user != null && userRepository.existsUserByEmail(application.getApplicant().getEmail())){
-            application.getApplicant().setApplicationHistoryIds(applications);
+        } else if (isUserHaveNoApplicationHistory(user, application)) {
+            user.setApplicationHistoryIds(applications);
             userRepository.save(user);
         } else {
             user = application.getApplicant();
+            userService.addUser(user);
             application.getApplicant().setApplicationHistoryIds(applications);
-            userRepository.save(user);
+            applicationRepository.save(application);
         }
-        application.setApplicant(user);
 
-        application.setCreateDate(LocalDateTime.now());
-        applicationRepository.save(application);
+        application.setApplicant(user);
+        application.setCreateDate(ZonedDateTime.now());
+
+        return applicationRepository.save(application);
+    }
+
+    private boolean isUserHaveApplicationHistory(User applicant, Application application) {
+        return userRepository.existsUserByEmail(application.getApplicant().getEmail())
+                && applicant != null && !CollectionUtils.isEmpty(applicant.getApplicationHistoryIds());
+    }
+
+    private boolean isUserHaveNoApplicationHistory(User applicant, Application application) {
+        return applicant != null && userRepository.existsUserByEmail(application.getApplicant().getEmail());
     }
 
     @Override

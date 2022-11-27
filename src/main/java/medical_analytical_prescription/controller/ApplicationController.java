@@ -25,8 +25,8 @@ public class ApplicationController {
     }
 
     @PostMapping("/add")
-    public void addApplication(@RequestBody Application application) {
-        applicationService.addApplication(application);
+    public Application addApplication(@RequestBody Application application) {
+        return applicationService.addApplication(application);
     }
 
     @DeleteMapping("/delete/{id}")

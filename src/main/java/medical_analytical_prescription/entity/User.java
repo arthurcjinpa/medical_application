@@ -1,10 +1,8 @@
 package medical_analytical_prescription.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import medical_analytical_prescription.enums.Sex;
 
 import javax.persistence.*;
 import java.util.List;
@@ -14,6 +12,7 @@ import java.util.List;
 // TODO: 29.04.2022 Объединить в @Data и исключить @ToString
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 /* TODO: 29.04.2022 Добавить поле IsRegistered, чтобы когда добавляю заявку
@@ -37,7 +36,7 @@ public class User {
     private int age;
 
     @Column
-    private String sex;
+    private Sex sex;
 
     @Column(unique = true)
     private String email;
