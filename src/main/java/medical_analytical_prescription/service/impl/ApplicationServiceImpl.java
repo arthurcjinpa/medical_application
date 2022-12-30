@@ -14,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,36 +31,34 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Application addApplication(Application application) {
-        List<Application> applications = new ArrayList<>();
-        applications.add(application);
 
-        User user = userRepository.getUserByEmail(application.getApplicant().getEmail());
+        Optional<User> user = userService.getUserByEmail(application.getApplicant().getEmail());
 
-        if (isUserHaveApplicationHistory(user, application)) {
-            user.getApplicationHistoryIds().add(application);
-        } else if (isUserHaveNoApplicationHistory(user, application)) {
-            user.setApplicationHistoryIds(applications);
-            userRepository.save(user);
-        } else {
-            user = application.getApplicant();
-            userService.addUser(user);
-            application.getApplicant().setApplicationHistoryIds(applications);
-            applicationRepository.save(application);
+        if (user.isEmpty()) {
+            user = Optional.ofNullable(userService.addUser(application.getApplicant()));
         }
 
-        application.setApplicant(user);
         application.setCreateDate(ZonedDateTime.now());
+        applicationRepository.save(application);
+
+        refreshApplicationHistoryIds(application, user);
+
+        application.setApplicant(user.get());
 
         return applicationRepository.save(application);
     }
 
-    private boolean isUserHaveApplicationHistory(User applicant, Application application) {
-        return userRepository.existsUserByEmail(application.getApplicant().getEmail())
-                && applicant != null && !CollectionUtils.isEmpty(applicant.getApplicationHistoryIds());
-    }
+    private void refreshApplicationHistoryIds(Application application, Optional<User> user) {
 
-    private boolean isUserHaveNoApplicationHistory(User applicant, Application application) {
-        return applicant != null && userRepository.existsUserByEmail(application.getApplicant().getEmail());
+        if (CollectionUtils.isEmpty(user.get().getApplicationHistoryIds())) {
+            List<Application> applications = new ArrayList<>();
+            applications.add(application);
+            user.get().setApplicationHistoryIds(applications);
+        } else {
+            user.get().getApplicationHistoryIds().add(application);
+        }
+
+        userRepository.save(user.get());
     }
 
     @Override
@@ -69,7 +68,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<Application> findApplicationsByUserId(Long id) {
-        return applicationRepository.findApplicationByApplicantId(id);
+        return applicationRepository.findApplicationByApplicantId(id)
+                .orElseThrow(
+                        () -> {
+                            throw new ApplicationNotFoundException("Application with user id " + id + " not found.");
+                        });
     }
 
     @Override

@@ -5,6 +5,7 @@ import lombok.*;
 import medical_analytical_prescription.enums.Sex;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -41,9 +42,12 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    //связь
     @JsonManagedReference
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "applicant", cascade = CascadeType.ALL)
-    private List<Application> applicationHistoryIds;
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "applicant",
+            orphanRemoval = true,
+            cascade = CascadeType.ALL)
+    private List<Application> applicationHistoryIds = new ArrayList<>();
 
 }
