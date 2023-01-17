@@ -1,14 +1,12 @@
 package medical_analytical_prescription.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import medical_analytical_prescription.enums.ApplicationStatus;
 import medical_analytical_prescription.utils.StringToListConverter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 //в будущем добавить поле, если прошел сесюрити (регистрацию), то будет поле boolean isClient
@@ -18,6 +16,7 @@ import java.util.List;
 // TODO: 29.04.2022 Объединить в @Data и исключить @ToString
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Application {
@@ -31,7 +30,7 @@ public class Application {
     private String context;
 
     @Column
-    private String status;
+    private ApplicationStatus status;
 
     @Column
     @Convert(converter = StringToListConverter.class)
@@ -43,7 +42,7 @@ public class Application {
     private User applicant;
 
     @Column
-    private LocalDateTime createDate;
+    private ZonedDateTime createDate;
 
     //потом сделать связь с врачом, чтоб у врача могли быть заявки юзеров
 }

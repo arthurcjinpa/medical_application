@@ -7,18 +7,21 @@ import medical_analytical_prescription.exception.ApplicationNotFoundException;
 import medical_analytical_prescription.repository.ApplicationRepository;
 import medical_analytical_prescription.repository.UserRepository;
 import medical_analytical_prescription.service.ApplicationService;
+import medical_analytical_prescription.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final UserRepository userRepository;
+    private final UserService userService;
     private final ApplicationRepository applicationRepository;
 
     @Override
@@ -27,26 +30,35 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public void addApplication(Application application) {
-        List<Application> applications = new ArrayList<>();
-        applications.add(application);
-        User user = userRepository.getUserByEmail(application.getApplicant().getEmail());
+    public Application addApplication(Application application) {
 
-        if (userRepository.existsUserByEmail(application.getApplicant().getEmail())
-                && user != null && !CollectionUtils.isEmpty(user.getApplicationHistoryIds())) {
-            user.getApplicationHistoryIds().add(application);
-        } else if(user != null && userRepository.existsUserByEmail(application.getApplicant().getEmail())){
-            application.getApplicant().setApplicationHistoryIds(applications);
-            userRepository.save(user);
-        } else {
-            user = application.getApplicant();
-            application.getApplicant().setApplicationHistoryIds(applications);
-            userRepository.save(user);
+        Optional<User> user = userService.getUserByEmail(application.getApplicant().getEmail());
+
+        if (user.isEmpty()) {
+            user = Optional.ofNullable(userService.addUser(application.getApplicant()));
         }
-        application.setApplicant(user);
 
-        application.setCreateDate(LocalDateTime.now());
+        application.setCreateDate(ZonedDateTime.now());
         applicationRepository.save(application);
+
+        refreshApplicationHistoryIds(application, user);
+
+        application.setApplicant(user.get());
+
+        return applicationRepository.save(application);
+    }
+
+    private void refreshApplicationHistoryIds(Application application, Optional<User> user) {
+
+        if (CollectionUtils.isEmpty(user.get().getApplicationHistoryIds())) {
+            List<Application> applications = new ArrayList<>();
+            applications.add(application);
+            user.get().setApplicationHistoryIds(applications);
+        } else {
+            user.get().getApplicationHistoryIds().add(application);
+        }
+
+        userRepository.save(user.get());
     }
 
     @Override
@@ -56,7 +68,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<Application> findApplicationsByUserId(Long id) {
-        return applicationRepository.findApplicationByApplicantId(id);
+        return applicationRepository.findApplicationByApplicantId(id)
+                .orElseThrow(
+                        () -> {
+                            throw new ApplicationNotFoundException("Application with user id " + id + " not found.");
+                        });
     }
 
     @Override

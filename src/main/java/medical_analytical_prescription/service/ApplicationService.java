@@ -10,7 +10,7 @@ public interface ApplicationService {
 
     List<Application> showAllApplications();
 
-    void addApplication(Application application);
+    Application addApplication(Application application);
 
     void deleteApplicationById(Long id);
 

@@ -4,6 +4,7 @@ import medical_analytical_prescription.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface UserService {
@@ -12,7 +13,9 @@ public interface UserService {
 
     User getUserById(Long id);
 
-    void addUser(User user);
+    Optional<User> getUserByEmail(String email);
+
+    User addUser(User user);
 
     void deleteUserByUserId(Long userId);
 }
