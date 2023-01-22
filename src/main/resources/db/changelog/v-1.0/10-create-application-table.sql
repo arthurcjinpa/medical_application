@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS public.application
 );
 
 ALTER TABLE IF EXISTS public.application
-    OWNER to tura;
+    OWNER to myuser;

@@ -1,5 +1,5 @@
 ALTER TABLE IF EXISTS public.application
-    OWNER to tura;
+    OWNER to myuser;
 
 DROP TABLE IF EXISTS public.application;
 
