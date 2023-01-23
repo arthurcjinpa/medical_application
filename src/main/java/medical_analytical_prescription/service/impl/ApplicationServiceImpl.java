@@ -32,33 +32,34 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public Application addApplication(Application application) {
 
-        Optional<User> user = userService.getUserByEmail(application.getApplicant().getEmail());
-
-        if (user.isEmpty()) {
-            user = Optional.ofNullable(userService.addUser(application.getApplicant()));
-        }
+        User user = userService.getUserByEmail(application.getApplicant().getEmail())
+                .orElseGet(() -> registerUserAndSetApplication(application));
 
         application.setCreateDate(ZonedDateTime.now());
         applicationRepository.save(application);
 
-        refreshApplicationHistoryIds(application, user);
-
-        application.setApplicant(user.get());
+        refreshOrCreateApplicationHistoryIds(application, user);
 
         return applicationRepository.save(application);
     }
 
-    private void refreshApplicationHistoryIds(Application application, Optional<User> user) {
+    private User registerUserAndSetApplication(Application application) {
+        User registeredUser = userService.addUser(application.getApplicant());
+        application.setApplicant(registeredUser);
+        return registeredUser;
+    }
 
-        if (CollectionUtils.isEmpty(user.get().getApplicationHistoryIds())) {
+    private void refreshOrCreateApplicationHistoryIds(Application application, User user) {
+
+        if (CollectionUtils.isEmpty(user.getApplicationHistoryIds())) {
             List<Application> applications = new ArrayList<>();
             applications.add(application);
-            user.get().setApplicationHistoryIds(applications);
+            user.setApplicationHistoryIds(applications);
         } else {
-            user.get().getApplicationHistoryIds().add(application);
+            user.getApplicationHistoryIds().add(application);
         }
 
-        userRepository.save(user.get());
+        userService.updateUser(user);
     }
 
     @Override
