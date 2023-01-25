@@ -10,16 +10,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "USERS")
-// TODO: 29.04.2022 Объединить в @Data и исключить @ToString
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-/* TODO: 29.04.2022 Добавить поле IsRegistered, чтобы когда добавляю заявку
-, сначала проверить, есть ли такой пользователь (если есть до добавим а не сетим)
- и не создавать ему заново лист историй с заявками */
-
 public class User {
 
     @Id

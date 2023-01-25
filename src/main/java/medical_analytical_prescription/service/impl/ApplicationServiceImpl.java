@@ -32,21 +32,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public Application addApplication(Application application) {
 
-        User user = userService.getUserByEmail(application.getApplicant().getEmail())
-                .orElseGet(() -> registerUserAndSetApplication(application));
+        User user = userService.checkUsersEmailUniqueness(application);
 
         application.setCreateDate(ZonedDateTime.now());
-        applicationRepository.save(application);
 
         refreshOrCreateApplicationHistoryIds(application, user);
 
-        return applicationRepository.save(application);
-    }
-
-    private User registerUserAndSetApplication(Application application) {
-        User registeredUser = userService.addUser(application.getApplicant());
-        application.setApplicant(registeredUser);
-        return registeredUser;
+        return application;
     }
 
     private void refreshOrCreateApplicationHistoryIds(Application application, User user) {
@@ -59,6 +51,8 @@ public class ApplicationServiceImpl implements ApplicationService {
             user.getApplicationHistoryIds().add(application);
         }
 
+        application.setApplicant(user);
+        applicationRepository.save(application);
         userService.updateUser(user);
     }
 

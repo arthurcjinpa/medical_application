@@ -1,5 +1,6 @@
 package medical_analytical_prescription.service;
 
+import medical_analytical_prescription.entity.Application;
 import medical_analytical_prescription.entity.User;
 import org.springframework.stereotype.Service;
 
@@ -19,5 +20,7 @@ public interface UserService {
 
     void deleteUserByUserId(Long userId);
 
-    User updateUser(User user);
+    void updateUser(User user);
+
+    User checkUsersEmailUniqueness(Application application);
 }

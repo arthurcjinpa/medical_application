@@ -1,6 +1,7 @@
 package medical_analytical_prescription.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import medical_analytical_prescription.entity.Application;
 import medical_analytical_prescription.entity.User;
 import medical_analytical_prescription.exception.UserAlreadyRegisteredException;
 import medical_analytical_prescription.exception.UserNotFoundException;
@@ -56,7 +57,18 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User updateUser(User user) {
-    return userRepository.save(user);
+  public void updateUser(User user) {
+    userRepository.save(user);
+  }
+
+  public User checkUsersEmailUniqueness(Application application) {
+    return getUserByEmail(application.getApplicant().getEmail())
+            .orElseGet(() -> registerUserAndSetApplication(application));
+  }
+
+  private User registerUserAndSetApplication(Application application) {
+    User registeredUser = addUser(application.getApplicant());
+    application.setApplicant(registeredUser);
+    return registeredUser;
   }
 }
