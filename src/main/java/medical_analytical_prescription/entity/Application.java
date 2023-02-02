@@ -25,6 +25,12 @@ public class Application {
     private Long id;
 
     @Column
+    private Long doctorId;
+
+    @Column
+    private ZonedDateTime sessionTime;
+
+    @Column
     private String context;
 
     @Column

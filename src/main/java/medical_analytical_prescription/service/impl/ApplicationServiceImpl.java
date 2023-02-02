@@ -1,13 +1,17 @@
 package medical_analytical_prescription.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import medical_analytical_prescription.dto.PrescriptionConfirmationDto;
 import medical_analytical_prescription.entity.Application;
 import medical_analytical_prescription.entity.User;
+import medical_analytical_prescription.enums.ApplicationStatus;
 import medical_analytical_prescription.exception.ApplicationNotFoundException;
+import medical_analytical_prescription.mapper.ApplicationMapper;
 import medical_analytical_prescription.repository.ApplicationRepository;
 import medical_analytical_prescription.repository.UserRepository;
 import medical_analytical_prescription.service.ApplicationService;
 import medical_analytical_prescription.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -16,12 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static medical_analytical_prescription.enums.ApplicationStatus.IN_PROGRESS;
+
 @Service
 @RequiredArgsConstructor
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final ApplicationMapper applicationMapper;
     private final ApplicationRepository applicationRepository;
 
     @Override
@@ -30,11 +37,26 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public Application addApplication(Application application) {
+    public Application addApplication(PrescriptionConfirmationDto confirmationDto) {
 
-        User user = userService.checkUsersEmailUniqueness(application);
 
-        application.setCreateDate(ZonedDateTime.now());
+        if(!confirmationDto.isApproved()) {
+            return null;
+        }
+
+        User user = userService.getUserById(confirmationDto.getUserId());
+
+        Application application = applicationMapper.
+                prescriptionConfirmationAnUserToEntity(confirmationDto, user);
+
+        ResponseEntity<String> responseCode = prescriptionService.prescriptionConfirmation(confirmationDto);
+
+        if(!responseCode.getStatusCode().is2xxSuccessful()){
+            throw new RuntimeException("Sorry! There was an error with prescription system," +
+                    " please try to add the application later.");
+        }
+
+//        User user = userService.checkUsersEmailUniqueness(application);
 
         refreshOrCreateApplicationHistoryIds(application, user);
 
@@ -52,6 +74,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         application.setApplicant(user);
+        application.setStatus(IN_PROGRESS);
         applicationRepository.save(application);
         userService.updateUser(user);
     }

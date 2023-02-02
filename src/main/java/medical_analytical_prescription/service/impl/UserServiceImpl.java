@@ -63,7 +63,9 @@ public class UserServiceImpl implements UserService {
 
   public User checkUsersEmailUniqueness(Application application) {
     return getUserByEmail(application.getApplicant().getEmail())
-            .orElseGet(() -> registerUserAndSetApplication(application));
+            .orElseGet(
+                    () -> registerUserAndSetApplication(application)
+            );
   }
 
   private User registerUserAndSetApplication(Application application) {
