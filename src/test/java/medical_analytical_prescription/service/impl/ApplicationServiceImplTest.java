@@ -2,6 +2,7 @@ package medical_analytical_prescription.service.impl;
 
 import medical_analytical_prescription.BaseTest;
 import medical_analytical_prescription.entity.Application;
+import medical_analytical_prescription.entity.User;
 import medical_analytical_prescription.exception.ApplicationNotFoundException;
 import medical_analytical_prescription.utils.ApplicationUtil;
 import org.junit.Before;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static medical_analytical_prescription.enums.ApplicationStatus.IN_PROGRESS;
+import static medical_analytical_prescription.enums.ApplicationStatus.READY_FOR_PRESCRIPTION;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
@@ -84,16 +86,26 @@ public class ApplicationServiceImplTest extends BaseTest {
     @Test
     public void addApplicationTest() {
         //given
-        Application createdApplication = applicationUtil.createApplication();
+        Application createdApplicationWithNotRegisteredUser = applicationUtil.createApplication();
+        User user = userService.addUser(createUser());
+        Application createdApplicationWithRegisteredUser = applicationUtil.createAnotherApplication(user);
 
         //when
-        Application savedApplication = applicationService.addApplication(createdApplication);
+        Application savedApplicationWithNewUser = applicationService.addApplication(createdApplicationWithNotRegisteredUser);
+        Application savedApplicationWithOldUser = applicationService.addApplication(createdApplicationWithRegisteredUser);
 
         //then
-        assertNotNull(savedApplication.getId());
-        assertNotNull(applicationService.getApplicationById(savedApplication.getId()));
-        assertEquals(savedApplication.getStatus(), IN_PROGRESS);
-        assertEquals(savedApplication.getContext(), createdApplication.getContext());
+        assertNotNull(savedApplicationWithNewUser.getId());
+        assertNotNull(savedApplicationWithOldUser.getId());
+
+        assertNotNull(applicationService.getApplicationById(savedApplicationWithNewUser.getId()));
+        assertNotNull(applicationService.getApplicationById(savedApplicationWithOldUser.getId()));
+
+        assertEquals(savedApplicationWithNewUser.getStatus(), IN_PROGRESS);
+        assertEquals(savedApplicationWithOldUser.getStatus(), READY_FOR_PRESCRIPTION);
+
+        assertEquals(savedApplicationWithNewUser.getContext(), createdApplicationWithNotRegisteredUser.getContext());
+        assertEquals(savedApplicationWithOldUser.getContext(), createdApplicationWithRegisteredUser.getContext());
     }
 
     @Test(expected = ApplicationNotFoundException.class)
@@ -108,6 +120,14 @@ public class ApplicationServiceImplTest extends BaseTest {
         //then
         assertNotNull(userService.getUserById(savedApplication.getApplicant().getId()));
         assertNull(applicationService.getApplicationById((savedApplication.getId())));
+    }
+
+    private User createUser() {
+        return User.builder()
+                .firstName("first name")
+                .lastName("last name")
+                .age(99)
+                .email("email@mail.com").build();
     }
 
 }

@@ -1,5 +1,7 @@
 package medical_analytical_prescription;
 
+import medical_analytical_prescription.mapper.ApplicationMapper;
+import medical_analytical_prescription.mapper.UserMapper;
 import medical_analytical_prescription.repository.ApplicationRepository;
 import medical_analytical_prescription.repository.UserRepository;
 import medical_analytical_prescription.service.ApplicationService;
@@ -23,5 +25,9 @@ public class BaseTest {
     protected UserRepository userRepository;
     @Autowired
     protected ApplicationRepository applicationRepository;
+    @Autowired
+    protected ApplicationMapper applicationMapper;
+    @Autowired
+    protected UserMapper userMapper;
 
 }

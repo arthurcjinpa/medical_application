@@ -32,33 +32,28 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public Application addApplication(Application application) {
 
-        Optional<User> user = userService.getUserByEmail(application.getApplicant().getEmail());
-
-        if (user.isEmpty()) {
-            user = Optional.ofNullable(userService.addUser(application.getApplicant()));
-        }
+        User user = userService.checkUsersEmailUniqueness(application);
 
         application.setCreateDate(ZonedDateTime.now());
-        applicationRepository.save(application);
 
-        refreshApplicationHistoryIds(application, user);
+        refreshOrCreateApplicationHistoryIds(application, user);
 
-        application.setApplicant(user.get());
-
-        return applicationRepository.save(application);
+        return application;
     }
 
-    private void refreshApplicationHistoryIds(Application application, Optional<User> user) {
+    private void refreshOrCreateApplicationHistoryIds(Application application, User user) {
 
-        if (CollectionUtils.isEmpty(user.get().getApplicationHistoryIds())) {
+        if (CollectionUtils.isEmpty(user.getApplicationHistoryIds())) {
             List<Application> applications = new ArrayList<>();
             applications.add(application);
-            user.get().setApplicationHistoryIds(applications);
+            user.setApplicationHistoryIds(applications);
         } else {
-            user.get().getApplicationHistoryIds().add(application);
+            user.getApplicationHistoryIds().add(application);
         }
 
-        userRepository.save(user.get());
+        application.setApplicant(user);
+        applicationRepository.save(application);
+        userService.updateUser(user);
     }
 
     @Override

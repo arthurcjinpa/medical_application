@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS public.users
 
 
 ALTER TABLE IF EXISTS public.users
-    OWNER to tura;
+    OWNER to myuser;
