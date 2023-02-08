@@ -10,17 +10,17 @@ import java.util.Optional;
 @Service
 public interface UserService {
 
-    List<User> getAllUsers();
+  List<User> getAllUsers();
 
-    User getUserById(Long id);
+  User getUserById(Long id);
 
-    Optional<User> getUserByEmail(String email);
+  Optional<User> getUserByEmail(String email);
 
-    User addUser(User user);
+  User addUser(User user);
 
-    void deleteUserByUserId(Long userId);
+  void deleteUserByUserId(Long userId);
 
-    void updateUser(User user);
+  void updateUser(User user);
 
-    User checkUsersEmailUniqueness(Application application);
+  User checkUsersEmailUniqueness(Application application);
 }

@@ -12,25 +12,25 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    @GetMapping("/list")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
+  @GetMapping("/list")
+  public List<User> getAllUsers() {
+    return userService.getAllUsers();
+  }
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
-    }
+  @GetMapping("/{id}")
+  public User getUserById(@PathVariable Long id) {
+    return userService.getUserById(id);
+  }
 
-    @PostMapping("/add")
-    public User addUser(@RequestBody User user) {
-        return userService.addUser(user);
-    }
+  @PostMapping("/add")
+  public User addUser(@RequestBody User user) {
+    return userService.addUser(user);
+  }
 
-    @DeleteMapping("/delete/{userId}")
-    public void deleteUsers(@PathVariable Long userId) {
-        userService.deleteUserByUserId(userId);
-    }
+  @DeleteMapping("/delete/{userId}")
+  public void deleteUsers(@PathVariable Long userId) {
+    userService.deleteUserByUserId(userId);
+  }
 }

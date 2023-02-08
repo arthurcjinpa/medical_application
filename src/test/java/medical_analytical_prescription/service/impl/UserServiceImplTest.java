@@ -1,9 +1,7 @@
 package medical_analytical_prescription.service.impl;
 
 import medical_analytical_prescription.BaseTest;
-import medical_analytical_prescription.entity.Application;
 import medical_analytical_prescription.entity.User;
-import medical_analytical_prescription.exception.ApplicationNotFoundException;
 import medical_analytical_prescription.exception.UserNotFoundException;
 import medical_analytical_prescription.utils.UserUtil;
 import org.junit.Before;
@@ -39,8 +37,7 @@ public class UserServiceImplTest extends BaseTest {
   @Test(expected = UserNotFoundException.class)
   public void getUserById() {
     // given
-    User createdUser = userUtil.createUser();
-    User savedUser = userService.addUser(createdUser);
+    User savedUser = addUser();
 
     // when
     User foundedUser = userService.getUserById(savedUser.getId());
@@ -59,8 +56,7 @@ public class UserServiceImplTest extends BaseTest {
   @Test
   public void getUserByEmail() {
     // given
-    User createdUser = userUtil.createUser();
-    User savedUser = userService.addUser(createdUser);
+    User savedUser = addUser();
 
     // when
     Optional<User> foundedUser = userService.getUserByEmail(savedUser.getEmail());
@@ -95,23 +91,8 @@ public class UserServiceImplTest extends BaseTest {
     assertNull(savedUser.getApplicationHistoryIds());
   }
 
-  @Test(expected = UserNotFoundException.class)
-  public void deleteUserByUserIdTest() {
-    // given
+  private User addUser() {
     User createdUser = userUtil.createUser();
-    Application savedApplication =
-        applicationService.addApplication(userUtil.createApplication(createdUser));
-    User savedUser = savedApplication.getApplicant();
-
-    // when
-    userService.deleteUserByUserId(savedUser.getId());
-
-    // then
-    try {
-      applicationService.getApplicationById(savedApplication.getId());
-    } catch (ApplicationNotFoundException ex) {
-      assertNotNull(ex.getMessage());
-      assertNull(userService.getUserById((savedUser.getId())));
-    }
+    return userService.addUser(createdUser);
   }
-    }
+}

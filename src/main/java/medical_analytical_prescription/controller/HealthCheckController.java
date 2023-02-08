@@ -18,21 +18,25 @@ import java.sql.Connection;
 @RequestMapping("/health")
 public class HealthCheckController {
 
-    private final DataSource dataSource;
+  private final DataSource dataSource;
 
-    @GetMapping
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("UP");
-    }
+  @GetMapping
+  public ResponseEntity<String> health() {
+    return ResponseEntity.ok("UP");
+  }
 
-    @GetMapping("/db/liquibase")
-    public ResponseEntity<String> healthLiquibase() {
-        try (Connection connection = dataSource.getConnection();
-             Liquibase liquibase = new Liquibase("db/changelog/db.changelog-master.xml", new ClassLoaderResourceAccessor(), new JdbcConnection(connection))) {
-            liquibase.validate();
-            return new ResponseEntity<>("UP", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("LIQUIBASE DOWN", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+  @GetMapping("/db/liquibase")
+  public ResponseEntity<String> healthLiquibase() {
+    try (Connection connection = dataSource.getConnection();
+        Liquibase liquibase =
+            new Liquibase(
+                "db/changelog/db.changelog-master.xml",
+                new ClassLoaderResourceAccessor(),
+                new JdbcConnection(connection))) {
+      liquibase.validate();
+      return new ResponseEntity<>("UP", HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>("LIQUIBASE DOWN", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 }

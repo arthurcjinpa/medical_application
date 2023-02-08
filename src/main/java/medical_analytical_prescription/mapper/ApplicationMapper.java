@@ -10,13 +10,21 @@ import org.mapstruct.NullValueCheckStrategy;
 
 import java.time.ZonedDateTime;
 
-@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, imports = ZonedDateTime.class)
+@Mapper(
+    componentModel = "spring",
+    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+    imports = ZonedDateTime.class)
 public interface ApplicationMapper {
 
-    @Mapping(target = "applicant", ignore = true)
-    Application applicationDtoToEntity(ApplicationDto applicationDto);
+  @Mapping(target = "applicant", ignore = true)
+  Application applicationDtoToEntity(ApplicationDto applicationDto);
 
-    Application prescriptionConfirmationAnUserToEntity(PrescriptionConfirmationDto confirmationDto, User user);
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "status", constant = "IN_PROGRESS")
+  @Mapping(target = "sessionTime", source = "confirmationDto.chosenTime")
+  @Mapping(target = "applicant", source = "user")
+  Application confirmationDtoAndUserToEntity(
+      PrescriptionConfirmationDto confirmationDto, User user);
 
-    ApplicationDto entityToApplicationDto(Application application);
+  ApplicationDto entityToApplicationDto(Application application);
 }

@@ -9,9 +9,9 @@ import medical_analytical_prescription.enums.Sex;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
-    private String firstName;
-    private String lastName;
-    private int age;
-    private Sex sex;
-    private String email;
+  private String firstName;
+  private String lastName;
+  private int age;
+  private Sex sex;
+  private String email;
 }

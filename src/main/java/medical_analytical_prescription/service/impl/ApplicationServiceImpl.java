@@ -4,101 +4,108 @@ import lombok.RequiredArgsConstructor;
 import medical_analytical_prescription.dto.PrescriptionConfirmationDto;
 import medical_analytical_prescription.entity.Application;
 import medical_analytical_prescription.entity.User;
-import medical_analytical_prescription.enums.ApplicationStatus;
 import medical_analytical_prescription.exception.ApplicationNotFoundException;
+import medical_analytical_prescription.feign.PrescriptionClient;
 import medical_analytical_prescription.mapper.ApplicationMapper;
 import medical_analytical_prescription.repository.ApplicationRepository;
 import medical_analytical_prescription.repository.UserRepository;
 import medical_analytical_prescription.service.ApplicationService;
 import medical_analytical_prescription.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import static medical_analytical_prescription.enums.ApplicationStatus.IN_PROGRESS;
 
 @Service
 @RequiredArgsConstructor
 public class ApplicationServiceImpl implements ApplicationService {
 
-    private final UserRepository userRepository;
-    private final UserService userService;
-    private final ApplicationMapper applicationMapper;
-    private final ApplicationRepository applicationRepository;
+  private final UserRepository userRepository;
+  private final UserService userService;
+  private final ApplicationMapper applicationMapper;
+  private final ApplicationRepository applicationRepository;
 
-    @Override
-    public List<Application> showAllApplications() {
-        return applicationRepository.findAll();
+  @Autowired private PrescriptionClient prescriptionClient;
+
+  public void setPrescriptionClient(PrescriptionClient prescriptionClient) {
+    this.prescriptionClient = prescriptionClient;
+  }
+
+  @Override
+  public List<Application> showAllApplications() {
+    return applicationRepository.findAll();
+  }
+
+  @Override
+  @Transactional
+  public Application addApplication(PrescriptionConfirmationDto confirmationDto) {
+
+    if (!confirmationDto.isApproved()) {
+      return null;
     }
 
-    @Override
-    public Application addApplication(PrescriptionConfirmationDto confirmationDto) {
+    User user = userService.getUserById(confirmationDto.getUserId());
 
+    Application application =
+        applicationMapper.confirmationDtoAndUserToEntity(confirmationDto, user);
 
-        if(!confirmationDto.isApproved()) {
-            return null;
-        }
+    ResponseEntity<String> responseCode =
+        prescriptionClient.prescriptionConfirmation(confirmationDto);
 
-        User user = userService.getUserById(confirmationDto.getUserId());
+    System.out.println(responseCode.getStatusCode().getReasonPhrase());
 
-        Application application = applicationMapper.
-                prescriptionConfirmationAnUserToEntity(confirmationDto, user);
-
-        ResponseEntity<String> responseCode = prescriptionService.prescriptionConfirmation(confirmationDto);
-
-        if(!responseCode.getStatusCode().is2xxSuccessful()){
-            throw new RuntimeException("Sorry! There was an error with prescription system," +
-                    " please try to add the application later.");
-        }
-
-//        User user = userService.checkUsersEmailUniqueness(application);
-
-        refreshOrCreateApplicationHistoryIds(application, user);
-
-        return application;
+    if (!responseCode.getStatusCode().is2xxSuccessful()) {
+      throw new RuntimeException(
+          "Sorry! There was an error with prescription system,"
+              + " please try to add the application later.");
     }
 
-    private void refreshOrCreateApplicationHistoryIds(Application application, User user) {
+    refreshOrCreateApplicationHistoryIds(application, user);
 
-        if (CollectionUtils.isEmpty(user.getApplicationHistoryIds())) {
-            List<Application> applications = new ArrayList<>();
-            applications.add(application);
-            user.setApplicationHistoryIds(applications);
-        } else {
-            user.getApplicationHistoryIds().add(application);
-        }
+    return application;
+  }
 
-        application.setApplicant(user);
-        application.setStatus(IN_PROGRESS);
-        applicationRepository.save(application);
-        userService.updateUser(user);
+  private void refreshOrCreateApplicationHistoryIds(Application application, User user) {
+
+    if (CollectionUtils.isEmpty(user.getApplicationHistoryIds())) {
+      List<Application> applications = new ArrayList<>();
+      applications.add(application);
+      user.setApplicationHistoryIds(applications);
+    } else {
+      user.getApplicationHistoryIds().add(application);
     }
 
-    @Override
-    public void deleteApplicationById(Long id) {
-        applicationRepository.deleteById(id);
-    }
+    applicationRepository.save(application);
+    userService.updateUser(user);
+  }
 
-    @Override
-    public List<Application> findApplicationsByUserId(Long id) {
-        return applicationRepository.findApplicationByApplicantId(id)
-                .orElseThrow(
-                        () -> {
-                            throw new ApplicationNotFoundException("Application with user id " + id + " not found.");
-                        });
-    }
+  @Override
+  public void deleteApplicationById(Long id) {
+    applicationRepository.deleteById(id);
+  }
 
-    @Override
-    public Application getApplicationById(Long id) {
-        return applicationRepository.findById(id)
-                .orElseThrow(
-                        () -> {
-                            throw new ApplicationNotFoundException("Application with id " + id + " not found.");
-                        });
-    }
+  @Override
+  public List<Application> findApplicationsByUserId(Long id) {
+    return applicationRepository
+        .findApplicationByApplicantId(id)
+        .orElseThrow(
+            () -> {
+              throw new ApplicationNotFoundException(
+                  "Application with user id " + id + " not found.");
+            });
+  }
+
+  @Override
+  public Application findApplicationById(Long id) {
+    return applicationRepository
+        .findById(id)
+        .orElseThrow(
+            () -> {
+              throw new ApplicationNotFoundException("Application with id " + id + " not found.");
+            });
+  }
 }

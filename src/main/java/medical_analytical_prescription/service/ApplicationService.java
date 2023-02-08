@@ -9,13 +9,13 @@ import java.util.List;
 @Service
 public interface ApplicationService {
 
-    List<Application> showAllApplications();
+  List<Application> showAllApplications();
 
-    Application addApplication(PrescriptionConfirmationDto prescriptionConfirmationDto);
+  Application addApplication(PrescriptionConfirmationDto prescriptionConfirmationDto);
 
-    void deleteApplicationById(Long id);
+  void deleteApplicationById(Long id);
 
-    List<Application> findApplicationsByUserId(Long id);
+  List<Application> findApplicationsByUserId(Long id);
 
-    Application getApplicationById(Long id);
+  Application findApplicationById(Long id);
 }

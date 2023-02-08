@@ -11,11 +11,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PrescriptionConfirmationDto {
-    private String context;
-    private List<String> symptoms;
-    private Long doctorId;
-    private String specialty;
-    private Long userId;
-    private ZonedDateTime chosenTime;
-    private boolean approved;
+  private String context;
+  private List<String> symptoms;
+  private Long doctorId;
+  private String specialty;
+  private Long userId;
+  private ZonedDateTime chosenTime;
+  private boolean approved;
 }

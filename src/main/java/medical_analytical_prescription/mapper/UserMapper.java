@@ -7,8 +7,11 @@ import org.mapstruct.NullValueCheckStrategy;
 
 import java.time.ZonedDateTime;
 
-@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, imports = ZonedDateTime.class)
+@Mapper(
+    componentModel = "spring",
+    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+    imports = ZonedDateTime.class)
 public interface UserMapper {
 
-    User userDtoToEntity(UserDto userDto);
+  User userDtoToEntity(UserDto userDto);
 }
