@@ -20,16 +20,18 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static medical_analytical_prescription.enums.ApplicationStatus.READY;
+
 @Service
 @RequiredArgsConstructor
 public class ApplicationServiceImpl implements ApplicationService {
 
-  private final UserRepository userRepository;
   private final UserService userService;
   private final ApplicationMapper applicationMapper;
   private final ApplicationRepository applicationRepository;
 
-  @Autowired private PrescriptionClient prescriptionClient;
+  @Autowired
+  private PrescriptionClient prescriptionClient;
 
   public void setPrescriptionClient(PrescriptionClient prescriptionClient) {
     this.prescriptionClient = prescriptionClient;
@@ -48,7 +50,7 @@ public class ApplicationServiceImpl implements ApplicationService {
       return null;
     }
 
-    User user = userService.getUserById(confirmationDto.getUserId());
+    User user = userService.getUserByEmail(confirmationDto.getUserEmail());
 
     Application application =
         applicationMapper.confirmationDtoAndUserToEntity(confirmationDto, user);
@@ -62,6 +64,8 @@ public class ApplicationServiceImpl implements ApplicationService {
       throw new RuntimeException(
           "Sorry! There was an error with prescription system,"
               + " please try to add the application later.");
+    } else {
+      application.setStatus(READY);
     }
 
     refreshOrCreateApplicationHistoryIds(application, user);

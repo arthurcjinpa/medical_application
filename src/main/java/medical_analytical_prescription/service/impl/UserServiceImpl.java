@@ -3,14 +3,12 @@ package medical_analytical_prescription.service.impl;
 import lombok.RequiredArgsConstructor;
 import medical_analytical_prescription.entity.Application;
 import medical_analytical_prescription.entity.User;
-import medical_analytical_prescription.exception.UserAlreadyRegisteredException;
 import medical_analytical_prescription.exception.UserNotFoundException;
 import medical_analytical_prescription.repository.UserRepository;
 import medical_analytical_prescription.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,18 +32,20 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Optional<User> getUserByEmail(String email) {
-    return userRepository.getUserByEmail(email);
+  public User getUserByEmail(String email) {
+    return userRepository
+        .getUserByEmail(email)
+        .orElseThrow(
+            () -> {
+              throw new UserNotFoundException("User with email " + email + " not found.");
+            });
   }
 
   @Override
   public User addUser(User user) {
 
-    Optional<User> userByEmail = getUserByEmail(user.getEmail());
-
-    if (userByEmail.isPresent()) {
-      throw new UserAlreadyRegisteredException(
-          "User with email " + user.getEmail() + " is already created");
+    if (isUserAlreadyRegistered(user.getEmail())) {
+      throw new UserNotFoundException("User with email " + user.getEmail() + " not found.");
     }
 
     return userRepository.save(user);
@@ -62,13 +62,20 @@ public class UserServiceImpl implements UserService {
   }
 
   public User checkUsersEmailUniqueness(Application application) {
-    return getUserByEmail(application.getApplicant().getEmail())
-        .orElseGet(() -> registerUserAndSetApplication(application));
+    if (isUserAlreadyRegistered(application.getApplicant().getEmail())) {
+      return getUserByEmail(application.getApplicant().getEmail());
+    } else {
+      return registerUserAndSetApplication(application);
+    }
   }
 
   private User registerUserAndSetApplication(Application application) {
     User registeredUser = addUser(application.getApplicant());
     application.setApplicant(registeredUser);
     return registeredUser;
+  }
+
+  private boolean isUserAlreadyRegistered(String email) {
+    return userRepository.existsUserByEmail(email);
   }
 }

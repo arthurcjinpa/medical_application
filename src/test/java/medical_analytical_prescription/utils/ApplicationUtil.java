@@ -20,7 +20,7 @@ public class ApplicationUtil {
         .specialty("GASTROENTEROLOGIST")
         .chosenTime(ZonedDateTime.of(2023, 2, 1, 13, 30, 0, 0, ZoneId.systemDefault()))
         .symptoms(List.of("diarrhea", "sensitivity to light", "jaw pain", "nausea"))
-        .userId(createUser().getId())
+        .userEmail(createUser().getEmail())
         .doctorId(2L)
         .approved(true)
         .build();
@@ -32,7 +32,7 @@ public class ApplicationUtil {
         .specialty("ORTHODONTIST")
         .chosenTime(ZonedDateTime.of(2023, 2, 1, 13, 30, 0, 0, ZoneId.systemDefault()))
         .symptoms(List.of("headache", "sensitivity to light"))
-        .userId(user.getId())
+        .userEmail(user.getEmail())
         .doctorId(4L)
         .approved(true)
         .build();

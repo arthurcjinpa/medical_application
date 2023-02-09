@@ -8,8 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
@@ -53,24 +51,23 @@ public class UserServiceImplTest extends BaseTest {
     userService.getUserById(999L);
   }
 
-  @Test
+  @Test(expected = UserNotFoundException.class)
   public void getUserByEmail() {
     // given
     User savedUser = addUser();
 
     // when
-    Optional<User> foundedUser = userService.getUserByEmail(savedUser.getEmail());
+   User foundedUser = userService.getUserByEmail(savedUser.getEmail());
 
     // then
-    assertTrue(foundedUser.isPresent());
-    assertEquals(savedUser.getId(), foundedUser.get().getId());
-    assertEquals(savedUser.getFirstName(), foundedUser.get().getFirstName());
-    assertEquals(savedUser.getLastName(), foundedUser.get().getLastName());
-    assertEquals(savedUser.getSex(), foundedUser.get().getSex());
-    assertEquals(savedUser.getAge(), foundedUser.get().getAge());
-    assertEquals(savedUser.getEmail(), foundedUser.get().getEmail());
+    assertEquals(savedUser.getId(), foundedUser.getId());
+    assertEquals(savedUser.getFirstName(), foundedUser.getFirstName());
+    assertEquals(savedUser.getLastName(), foundedUser.getLastName());
+    assertEquals(savedUser.getSex(), foundedUser.getSex());
+    assertEquals(savedUser.getAge(), foundedUser.getAge());
+    assertEquals(savedUser.getEmail(), foundedUser.getEmail());
     assertNull(savedUser.getApplicationHistoryIds());
-    assertTrue(userService.getUserByEmail("EMAIL").isEmpty());
+    assertNotNull(userService.getUserByEmail("EMAIL"));
   }
 
   @Test

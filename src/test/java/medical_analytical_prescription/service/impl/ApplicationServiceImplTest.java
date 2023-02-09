@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static medical_analytical_prescription.enums.ApplicationStatus.IN_PROGRESS;
+import static medical_analytical_prescription.enums.ApplicationStatus.READY;
+import static medical_analytical_prescription.enums.Sex.W;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -95,18 +96,25 @@ public class ApplicationServiceImplTest extends BaseTest {
         applicationUtil.createAnotherConfirmationDto(user);
 
     // when
-    Application savedApplicationWithOldUser =
+    Application savedApplicationWithRegisteredUser =
         applicationService.addApplication(createdConfirmationWithRegisteredUser);
 
     // then
-    assertNotNull(savedApplicationWithOldUser.getId());
+    assertNotNull(savedApplicationWithRegisteredUser.getId());
 
-    assertNotNull(applicationService.findApplicationById(savedApplicationWithOldUser.getId()));
+    assertEquals(1, user.getApplicationHistoryIds().size());
 
-    assertEquals(savedApplicationWithOldUser.getStatus(), IN_PROGRESS);
+    assertNotNull(
+        applicationService.findApplicationById(savedApplicationWithRegisteredUser.getId()));
+
+    assertEquals(savedApplicationWithRegisteredUser.getStatus(), READY);
 
     assertEquals(
-        savedApplicationWithOldUser.getContext(),
+        savedApplicationWithRegisteredUser.getSessionTime(),
+        createdConfirmationWithRegisteredUser.getChosenTime());
+
+    assertEquals(
+        savedApplicationWithRegisteredUser.getContext(),
         createdConfirmationWithRegisteredUser.getContext());
   }
 
@@ -126,6 +134,7 @@ public class ApplicationServiceImplTest extends BaseTest {
   private User createUser() {
     return User.builder()
         .firstName("first name")
+        .sex(W)
         .lastName("last name")
         .age(99)
         .email("email@mail.com")

@@ -24,6 +24,11 @@ public class UserController {
     return userService.getUserById(id);
   }
 
+  @GetMapping
+  public User getUserByEmail(@RequestParam("email") String email) {
+    return userService.getUserByEmail(email);
+  }
+
   @PostMapping("/add")
   public User addUser(@RequestBody User user) {
     return userService.addUser(user);

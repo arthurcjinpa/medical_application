@@ -20,7 +20,7 @@ public interface ApplicationMapper {
   Application applicationDtoToEntity(ApplicationDto applicationDto);
 
   @Mapping(target = "id", ignore = true)
-  @Mapping(target = "status", constant = "IN_PROGRESS")
+  @Mapping(target = "status", constant = "READY_FOR_PRESCRIPTION")
   @Mapping(target = "sessionTime", source = "confirmationDto.chosenTime")
   @Mapping(target = "applicant", source = "user")
   Application confirmationDtoAndUserToEntity(

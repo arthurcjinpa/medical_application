@@ -15,7 +15,7 @@ public class PrescriptionConfirmationDto {
   private List<String> symptoms;
   private Long doctorId;
   private String specialty;
-  private Long userId;
+  private String userEmail;
   private ZonedDateTime chosenTime;
   private boolean approved;
 }

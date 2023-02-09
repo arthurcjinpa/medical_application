@@ -22,15 +22,19 @@ public class User {
   @SequenceGenerator(name = "users_id_seq", schema = "public", allocationSize = 1)
   private Long id;
 
-  @Column private String firstName;
+  @Column
+  private String firstName;
 
-  @Column private String lastName;
+  @Column
+  private String lastName;
 
-  @Column private int age;
+  @Column
+  private int age;
 
-  @Column private Sex sex;
+  @Column
+  private Sex sex;
 
-  @Column(unique = true)
+  @Column(unique = true, nullable = false)
   private String email;
 
   @JsonManagedReference

@@ -1,7 +1,6 @@
 package medical_analytical_prescription;
 
 import medical_analytical_prescription.entity.User;
-import medical_analytical_prescription.repository.ApplicationRepository;
 import medical_analytical_prescription.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -22,11 +21,12 @@ public class MedApplicationLauncher {
   }
 
   @Bean
-  CommandLineRunner runner(
-      UserRepository userRepository, ApplicationRepository applicationRepository) {
+  CommandLineRunner runner(UserRepository userRepository) {
     return args -> {
-      userRepository.save(new User(1L, "Nicolaus", "Copernicus", 24, M, "nicop@mail.com", null));
-      userRepository.save(new User(1L, "Galileo", "Galilei", 45, M, "galeo@mail.com", null));
+      if (userRepository.count() == 0) {
+        userRepository.save(new User(1L, "Nicolaus", "Copernicus", 24, M, "nicop@mail.com", null));
+        userRepository.save(new User(2L, "Galileo", "Galilei", 45, M, "galeo@mail.com", null));
+      }
     };
   }
 }
