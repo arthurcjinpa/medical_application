@@ -3,7 +3,7 @@
 
 Medical Analytical Prescription is a tool that aims to make the process of finding a suitable doctor and receiving a prescription more efficient and convenient.
 
-With this project, you can input your symptoms and receive information about doctors that match your needs, including their specialty, experience, sex, and price. This helps you make an informed decision about which doctor to visit.
+With this project, you can input your symptoms and receive information about doctors that match your needs, including their specialty, experience, and price. This helps you make an informed decision about which doctor to visit.
 
 In addition, Medical Analytical Prescription also allows you to book appointments and receive prescriptions online. This eliminates the need for in-person visits to the doctor's office, making the process more convenient and accessible.
 
