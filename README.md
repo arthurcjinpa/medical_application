@@ -1,5 +1,5 @@
 
-# Medical analytical presctiption
+# Medical analytical prescription
 
 Medical Analytical Prescription is a tool that aims to make the process of finding a suitable doctor and receiving a prescription more efficient and convenient.
 
