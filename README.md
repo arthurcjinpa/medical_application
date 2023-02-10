@@ -134,7 +134,7 @@ or other showAll requests.
 
 ## Tech Stack
 
-**Frameworks:** Spring, Hibernate, Junit, Mockito, Liquibase
+**Frameworks:** Spring, Hibernate, Junit, Mockito, Liquibase, Drools
 
 **Databases:** MySQL, PostgreSQL
 
