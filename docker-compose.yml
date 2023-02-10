@@ -1,6 +1,7 @@
 version: '3'
 services:
   app:
+    restart: on-failure
     build: .
     ports:
       - "8080:8080"
@@ -21,12 +22,13 @@ services:
     volumes:
       - ./:/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     image: postgres
     restart: always

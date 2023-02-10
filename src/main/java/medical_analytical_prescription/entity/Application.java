@@ -19,27 +19,33 @@ import java.util.List;
 @NoArgsConstructor
 public class Application {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "application_id_seq")
-    @SequenceGenerator(name = "application_id_seq", schema = "public", allocationSize = 1)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "application_id_seq")
+  @SequenceGenerator(name = "application_id_seq", schema = "public", allocationSize = 1)
+  private Long id;
 
-    @Column
-    private String context;
+  @Column
+  private Long doctorId;
 
-    @Column
-    private ApplicationStatus status;
+  @Column
+  private ZonedDateTime sessionTime;
 
-    @Column
-    @Convert(converter = StringToListConverter.class)
-    private List<String> symptoms;
+  @Column
+  private String context;
 
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "APPLICANT_ID")
-    private User applicant;
+  @Column
+  private ApplicationStatus status;
 
-    @Column
-    @CreationTimestamp
-    private ZonedDateTime createDate;
+  @Column
+  @Convert(converter = StringToListConverter.class)
+  private List<String> symptoms;
+
+  @JsonBackReference
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "APPLICANT_ID")
+  private User applicant;
+
+  @Column
+  @CreationTimestamp
+  private ZonedDateTime createDate;
 }

@@ -17,32 +17,27 @@ import java.util.List;
 @NoArgsConstructor
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_seq")
-    @SequenceGenerator(name = "users_id_seq", schema = "public", allocationSize = 1)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_seq")
+  @SequenceGenerator(name = "users_id_seq", schema = "public", allocationSize = 1)
+  private Long id;
 
-    @Column
-    private String firstName;
+  @Column
+  private String firstName;
 
-    @Column
-    private String lastName;
+  @Column
+  private String lastName;
 
-    @Column
-    private int age;
+  @Column
+  private int age;
 
-    @Column
-    private Sex sex;
+  @Column
+  private Sex sex;
 
-    @Column(unique = true)
-    private String email;
+  @Column(unique = true, nullable = false)
+  private String email;
 
-    @JsonManagedReference
-    @OneToMany(
-            fetch = FetchType.LAZY,
-            mappedBy = "applicant",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL)
-    private List<Application> applicationHistoryIds = new ArrayList<>();
-
+  @JsonManagedReference
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "applicant", cascade = CascadeType.ALL)
+  private List<Application> applicationHistoryIds = new ArrayList<>();
 }

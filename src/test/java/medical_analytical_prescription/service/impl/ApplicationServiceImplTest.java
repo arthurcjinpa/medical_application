@@ -1,133 +1,151 @@
 package medical_analytical_prescription.service.impl;
 
 import medical_analytical_prescription.BaseTest;
+import medical_analytical_prescription.dto.PrescriptionConfirmationDto;
 import medical_analytical_prescription.entity.Application;
 import medical_analytical_prescription.entity.User;
 import medical_analytical_prescription.exception.ApplicationNotFoundException;
+import medical_analytical_prescription.feign.PrescriptionClient;
 import medical_analytical_prescription.utils.ApplicationUtil;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static medical_analytical_prescription.enums.ApplicationStatus.IN_PROGRESS;
-import static medical_analytical_prescription.enums.ApplicationStatus.READY_FOR_PRESCRIPTION;
+import static medical_analytical_prescription.enums.ApplicationStatus.READY;
+import static medical_analytical_prescription.enums.Sex.W;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Transactional
 public class ApplicationServiceImplTest extends BaseTest {
 
-    private ApplicationUtil applicationUtil;
+  private ApplicationUtil applicationUtil;
 
-    @Before
-    public void before() {
-        applicationUtil = new ApplicationUtil();
-    }
+  @Before
+  public void before() {
+    applicationUtil = new ApplicationUtil();
 
-    @Test
-    public void showAllApplicationsTest() {
-        //given
-        int repositorySize = applicationRepository.findAll().size();
+    PrescriptionClient mockPrescriptionClient = mock(PrescriptionClient.class);
+    ResponseEntity<String> mockResponse = new ResponseEntity<>("Success", HttpStatus.OK);
+    when(mockPrescriptionClient.prescriptionConfirmation(any(PrescriptionConfirmationDto.class)))
+        .thenReturn(mockResponse);
+    applicationServiceImpl.setPrescriptionClient(mockPrescriptionClient);
+  }
 
-        //when
-        int serviceSize = applicationService.showAllApplications().size();
+  @Test
+  public void showAllApplicationsTest() {
+    // given
+    int repositorySize = applicationRepository.findAll().size();
 
-        //then
-        assertEquals(repositorySize, serviceSize);
-    }
+    // when
+    int serviceSize = applicationService.showAllApplications().size();
 
-    @Test
-    public void getApplicationByIdTest() {
-        //given
-        Application createdApplication = applicationUtil.createApplication();
-        Application savedApplication = applicationService.addApplication(createdApplication);
+    // then
+    assertEquals(repositorySize, serviceSize);
+  }
 
-        //when
-        Application foundedApplication = applicationService.getApplicationById(savedApplication.getId());
+  @Test
+  public void findApplicationByIdTest() {
+    // given
+    Application savedApplication = addApplication();
 
-        //then
-        assertEquals(savedApplication.getApplicant(), foundedApplication.getApplicant());
-        assertEquals(savedApplication.getSymptoms(), foundedApplication.getSymptoms());
-        assertEquals(savedApplication.getContext(), foundedApplication.getContext());
-        assertEquals(savedApplication.getStatus(), foundedApplication.getStatus());
-        assertEquals(savedApplication.getCreateDate(), foundedApplication.getCreateDate());
-    }
+    // when
+    Application foundedApplication =
+        applicationService.findApplicationById(savedApplication.getId());
 
-    @Test
-    public void findApplicationsByUserIdTest() {
-        //given
-        Application createdApplication = applicationUtil.createApplication();
-        Application savedApplication = applicationService.addApplication(createdApplication);
+    // then
+    assertEquals(savedApplication.getApplicant(), foundedApplication.getApplicant());
+    assertEquals(savedApplication.getSymptoms(), foundedApplication.getSymptoms());
+    assertEquals(savedApplication.getContext(), foundedApplication.getContext());
+    assertEquals(savedApplication.getStatus(), foundedApplication.getStatus());
+    assertEquals(savedApplication.getCreateDate(), foundedApplication.getCreateDate());
+  }
 
-        Application createdAnotherApplication = applicationUtil.createAnotherApplication(savedApplication.getApplicant());
-        Application savedAnotherApplication = applicationService.addApplication(createdAnotherApplication);
+  @Test
+  public void findApplicationsByUserIdTest() {
+    // given
+    Application savedApplication = addApplication();
 
-        //when
-        List<Application> foundedApplication =
-                applicationService.findApplicationsByUserId(savedApplication.getApplicant().getId());
+    // when
+    List<Application> foundedApplication =
+        applicationService.findApplicationsByUserId(savedApplication.getApplicant().getId());
 
-        //then
-        assertEquals(2, foundedApplication.size());
+    // then
+    assertEquals(1, foundedApplication.size());
 
-        assertEquals(savedApplication.getApplicant(), foundedApplication.get(0).getApplicant());
-        assertEquals(savedAnotherApplication.getApplicant(), foundedApplication.get(1).getApplicant());
+    assertEquals(savedApplication.getApplicant(), foundedApplication.get(0).getApplicant());
 
-        assertEquals(savedApplication.getId(), foundedApplication.get(0).getId());
-        assertEquals(savedAnotherApplication.getId(), foundedApplication.get(1).getId());
+    assertEquals(savedApplication.getId(), foundedApplication.get(0).getId());
 
-        assertEquals(savedApplication.getSymptoms(), foundedApplication.get(0).getSymptoms());
-        assertEquals(savedAnotherApplication.getSymptoms(), foundedApplication.get(1).getSymptoms());
+    assertEquals(savedApplication.getSymptoms(), foundedApplication.get(0).getSymptoms());
 
-        assertEquals(savedApplication.getStatus(), foundedApplication.get(0).getStatus());
-        assertEquals(savedAnotherApplication.getStatus(), foundedApplication.get(1).getStatus());
-    }
+    assertEquals(savedApplication.getStatus(), foundedApplication.get(0).getStatus());
+  }
 
-    @Test
-    public void addApplicationTest() {
-        //given
-        Application createdApplicationWithNotRegisteredUser = applicationUtil.createApplication();
-        User user = userService.addUser(createUser());
-        Application createdApplicationWithRegisteredUser = applicationUtil.createAnotherApplication(user);
+  @Test
+  public void addApplicationTest() {
+    // given
+    User user = userService.addUser(createUser());
+    PrescriptionConfirmationDto createdConfirmationWithRegisteredUser =
+        applicationUtil.createAnotherConfirmationDto(user);
 
-        //when
-        Application savedApplicationWithNewUser = applicationService.addApplication(createdApplicationWithNotRegisteredUser);
-        Application savedApplicationWithOldUser = applicationService.addApplication(createdApplicationWithRegisteredUser);
+    // when
+    Application savedApplicationWithRegisteredUser =
+        applicationService.addApplication(createdConfirmationWithRegisteredUser);
 
-        //then
-        assertNotNull(savedApplicationWithNewUser.getId());
-        assertNotNull(savedApplicationWithOldUser.getId());
+    // then
+    assertNotNull(savedApplicationWithRegisteredUser.getId());
 
-        assertNotNull(applicationService.getApplicationById(savedApplicationWithNewUser.getId()));
-        assertNotNull(applicationService.getApplicationById(savedApplicationWithOldUser.getId()));
+    assertEquals(1, user.getApplicationHistoryIds().size());
 
-        assertEquals(savedApplicationWithNewUser.getStatus(), IN_PROGRESS);
-        assertEquals(savedApplicationWithOldUser.getStatus(), READY_FOR_PRESCRIPTION);
+    assertNotNull(
+        applicationService.findApplicationById(savedApplicationWithRegisteredUser.getId()));
 
-        assertEquals(savedApplicationWithNewUser.getContext(), createdApplicationWithNotRegisteredUser.getContext());
-        assertEquals(savedApplicationWithOldUser.getContext(), createdApplicationWithRegisteredUser.getContext());
-    }
+    assertEquals(savedApplicationWithRegisteredUser.getStatus(), READY);
 
-    @Test(expected = ApplicationNotFoundException.class)
-    public void deleteApplicationByIdTest() {
-        //given
-        Application createdApplication = applicationUtil.createApplication();
-        Application savedApplication = applicationService.addApplication(createdApplication);
+    assertEquals(
+        savedApplicationWithRegisteredUser.getSessionTime(),
+        createdConfirmationWithRegisteredUser.getChosenTime());
 
-        //when
-        applicationService.deleteApplicationById(savedApplication.getId());
+    assertEquals(
+        savedApplicationWithRegisteredUser.getContext(),
+        createdConfirmationWithRegisteredUser.getContext());
+  }
 
-        //then
-        assertNotNull(userService.getUserById(savedApplication.getApplicant().getId()));
-        assertNull(applicationService.getApplicationById((savedApplication.getId())));
-    }
+  @Test(expected = ApplicationNotFoundException.class)
+  public void deleteApplicationByIdTest() {
+    // given
+    Application savedApplication = addApplication();
 
-    private User createUser() {
-        return User.builder()
-                .firstName("first name")
-                .lastName("last name")
-                .age(99)
-                .email("email@mail.com").build();
-    }
+    // when
+    applicationService.deleteApplicationById(savedApplication.getId());
 
+    // then
+    assertNotNull(userService.getUserById(savedApplication.getApplicant().getId()));
+    assertNull(applicationService.findApplicationById((savedApplication.getId())));
+  }
+
+  private User createUser() {
+    return User.builder()
+        .firstName("first name")
+        .sex(W)
+        .lastName("last name")
+        .age(99)
+        .email("email@mail.com")
+        .build();
+  }
+
+  private Application addApplication() {
+    User user = userService.addUser(createUser());
+    PrescriptionConfirmationDto createdConfirmationWithRegisteredUser =
+        applicationUtil.createAnotherConfirmationDto(user);
+
+    return applicationService.addApplication(createdConfirmationWithRegisteredUser);
+  }
 }
